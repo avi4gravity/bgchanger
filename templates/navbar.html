@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top" id="navbar-custom">
+    <!-- Brand -->
+    <a class="navbar-brand" id="n-brand" href="{% url 'home' %}">Background Changer</a>
+    <!-- Toggler/collapsibe Button -->
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navb" aria-expanded="true">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Navbar links -->
+
+    <div class="navbar-collapse collapse hide" id="navb">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'home' %}">Home</a>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'upload' %}">Upload</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'images' %}">Images</a>
+        </li>
+        {% endif %}
+      </ul>
+  
+      <ul class="nav navbar-nav ml-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile' %}">My-Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log-out</a>
+          </li>
+         {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          {% endif %}
+      </ul>
+    </div>
+  </nav>

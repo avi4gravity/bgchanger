@@ -1,0 +1,11 @@
+.dz{
+    border: dashed !important;
+    border-color: #ccc !important;
+    border-radius: 10px !important;
+}
+.dz:hover{
+    background-color: aliceblue !important;
+}
+.upbody{
+    background-color: azure;
+}

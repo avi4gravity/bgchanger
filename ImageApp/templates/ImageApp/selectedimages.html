@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="PageCustomHeading ml-5" align="left">Your Selected Images</div>
+    <hr>
+    <div class="row p-row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-3">
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">User Image</p>
+                    <img src="{{user_image.first.image.url}}" width="300" height="300" alt="image" class="rounded img-fluid img-thumbnail" id="image-user">
+                    <button class="btn btn-outline-danger btn-sm thumb-img" name="image-user"> Preview Image</button>
+                </div>
+            </div>        
+        </div>
+        <div class="col-sm-3">
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">Background Image</p>
+                    <img src="{{back_image.first.imageURL}}" width="300" height="300" alt="image" class="rounded img-fluid img-thumbnail" id="image-back">
+                    <button class="btn btn-outline-danger btn-sm thumb-img" name="image-back"> Preview Image</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3"></div>
+    </div>
+
+{% include 'ImageApp/modalimages.html' %}
+{% endblock content %}

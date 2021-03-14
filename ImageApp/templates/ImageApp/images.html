@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="PageCustomHeading ml-5" align="left">Your Uploaded Images</div>
+    <hr>
+    <div class="row p-row">
+            {% for img in images_data %}
+            <div class="col-sm-3">
+                <div class="card">
+                    <img src="{{img.image.url}}" width="300" height="300" alt="image" class="rounded img-fluid img-thumbnail" id="image-{{forloop.counter}}">
+                    <div class="card-body">
+                      <button class="btn btn-outline-danger btn-sm thumb-img" name="image-{{forloop.counter}}"> Preview Image</button>
+                      <!--
+                      <a class="btn btn-outline-info btn-sm" href="backgrounds/{{img.pk}}"> Select Image</a>
+                      -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+    </div>
+
+{% include 'ImageApp/modalimages.html' %}
+{% endblock content %}

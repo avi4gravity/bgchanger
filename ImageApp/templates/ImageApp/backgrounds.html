@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="PageCustomHeading ml-5" align="left">Background Images</div>
+    <hr>
+    <div class="row p-row">        
+            <div class="col-sm-3">
+                <div id="img-preview">
+                    <div class="card">
+                        <img src="{{preview_image.first.image.url}}" align="center" class="img-fluid img-thumbnail" id="image-preview">
+                        <div class="card-body">
+                            <p class="card-text">Your Image</p>
+                            <button class="btn btn-outline-danger btn-block btn-sm thumb-img" name="image-preview">Preview Image</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                {% for img in back_images_data %}
+                <div class="col-sm-3">
+                    <div class="card">
+                        <img src="{{img.imageURL}}" style="width:100%" alt="image" class="rounded img-fluid img-thumbnail"  id="image-{{forloop.counter}}">
+                        <div class="card-body">
+                            <button class="btn btn-outline-danger btn-sm thumb-img" name="image-{{forloop.counter}}">Preview Image</button>
+                            <a class="btn btn-outline-info btn-sm" href="/imagesselected/{{preview_image.first.pk}}/{{img.pk}}"> Select Image</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+    </div>
+
+{% include 'ImageApp/modalimages.html' %}
+
+{% endblock content %}

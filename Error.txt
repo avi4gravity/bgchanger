@@ -1,0 +1,237 @@
+File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\__init__.py", line 61, in close_old_connections
+    conn.close_if_unusable_or_obsolete()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\base\base.py", line 513, in close_if_unusable_or_obsolete
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 190, in close
+    if not self.is_in_memory_db():
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 282, in is_in_memory_db
+    return self.creation.is_in_memory_db(self.settings_dict['NAME'])
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\creation.py", line 12, in is_in_memory_db
+    return database_name == ':memory:' or 'mode=memory' in database_name
+TypeError: argument of type 'WindowsPath' is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 650, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 720, in __init__
+    self.handle()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 169, in handle
+    self.handle_one_request()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 194, in handle_one_request
+    handler.run(self.server.get_app())
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 145, in run
+    self.handle_error()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 116, in handle_error
+    super().handle_error()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 381, in handle_error
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 184, in finish_response
+    self.write(data)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 287, in write
+    self.send_headers()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 344, in send_headers
+    if not self.origin_server or self.client_is_modern():
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 357, in client_is_modern
+    return self.environ['SERVER_PROTOCOL'].upper() != 'HTTP/0.9'
+TypeError: 'NoneType' object is not subscriptable
+----------------------------------------
+[30/Jan/2021 06:41:52] "GET /upload HTTP/1.1" 200 6213
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 138, in run
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 196, in finish_response
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 111, in close
+    super().close()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\simple_server.py", line 38, in close
+    SimpleHandler.close(self)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 334, in close
+    self.result.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\http\response.py", line 252, in close
+    signals.request_finished.send(sender=self._handler_class)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in send
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in <listcomp>
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\__init__.py", line 61, in close_old_connections
+    conn.close_if_unusable_or_obsolete()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\base\base.py", line 513, in close_if_unusable_or_obsolete
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 190, in close
+    if not self.is_in_memory_db():
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 282, in is_in_memory_db
+    return self.creation.is_in_memory_db(self.settings_dict['NAME'])
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\creation.py", line 12, in is_in_memory_db
+    return database_name == ':memory:' or 'mode=memory' in database_name
+TypeError: argument of type 'WindowsPath' is not iterable
+[30/Jan/2021 06:41:52] "GET /upload HTTP/1.1" 500 59
+----------------------------------------
+Exception happened during processing of request from ('127.0.0.1', 33158)
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 138, in run
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 196, in finish_response
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 111, in close
+    super().close()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\simple_server.py", line 38, in close
+    SimpleHandler.close(self)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 334, in close
+    self.result.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\http\response.py", line 252, in close
+    signals.request_finished.send(sender=self._handler_class)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in send
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in <listcomp>
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\__init__.py", line 61, in close_old_connections
+    conn.close_if_unusable_or_obsolete()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\base\base.py", line 513, in close_if_unusable_or_obsolete
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 190, in close
+    if not self.is_in_memory_db():
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 282, in is_in_memory_db
+    return self.creation.is_in_memory_db(self.settings_dict['NAME'])
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\creation.py", line 12, in is_in_memory_db
+    return database_name == ':memory:' or 'mode=memory' in database_name
+TypeError: argument of type 'WindowsPath' is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 650, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 720, in __init__
+    self.handle()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 169, in handle
+    self.handle_one_request()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 194, in handle_one_request
+    handler.run(self.server.get_app())
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 145, in run
+    self.handle_error()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 116, in handle_error
+    super().handle_error()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 381, in handle_error
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 184, in finish_response
+    self.write(data)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 287, in write
+    self.send_headers()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 344, in send_headers
+    if not self.origin_server or self.client_is_modern():
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 357, in client_is_modern
+    return self.environ['SERVER_PROTOCOL'].upper() != 'HTTP/0.9'
+TypeError: 'NoneType' object is not subscriptable
+----------------------------------------
+Current image :14 || then back image 1
+Internal Server Error: /upload
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\handlers\base.py", line 126, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\handlers\base.py", line 124, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\contrib\auth\decorators.py", line 21, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "F:\UpworkProjects\StaticImageSelfiBackgroundChange\BackgroundChangerV1\ImageApp\views.py", line 49, in file_upload_view
+    ImageBackChanger(current_image.pk,backid)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\contrib\auth\decorators.py", line 20, in _wrapped_view
+    if test_func(request.user):
+AttributeError: 'int' object has no attribute 'user'
+[30/Jan/2021 06:42:11] "POST /upload HTTP/1.1" 500 81967
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 138, in run
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 196, in finish_response
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 111, in close
+    super().close()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\simple_server.py", line 38, in close
+    SimpleHandler.close(self)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 334, in close
+    self.result.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\http\response.py", line 252, in close
+    signals.request_finished.send(sender=self._handler_class)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in send
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in <listcomp>
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\__init__.py", line 61, in close_old_connections
+    conn.close_if_unusable_or_obsolete()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\base\base.py", line 513, in close_if_unusable_or_obsolete
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 190, in close
+    if not self.is_in_memory_db():
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 282, in is_in_memory_db
+    return self.creation.is_in_memory_db(self.settings_dict['NAME'])
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\creation.py", line 12, in is_in_memory_db
+    return database_name == ':memory:' or 'mode=memory' in database_name
+TypeError: argument of type 'WindowsPath' is not iterable
+[30/Jan/2021 06:42:11] "POST /upload HTTP/1.1" 500 59
+----------------------------------------
+Exception happened during processing of request from ('127.0.0.1', 33159)
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 138, in run
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 196, in finish_response
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 111, in close
+    super().close()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\simple_server.py", line 38, in close
+    SimpleHandler.close(self)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 334, in close
+    self.result.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\http\response.py", line 252, in close
+    signals.request_finished.send(sender=self._handler_class)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in send
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\dispatch\dispatcher.py", line 175, in <listcomp>
+    for receiver in self._live_receivers(sender)
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\__init__.py", line 61, in close_old_connections
+    conn.close_if_unusable_or_obsolete()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\base\base.py", line 513, in close_if_unusable_or_obsolete
+    self.close()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 190, in close
+    if not self.is_in_memory_db():
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\base.py", line 282, in is_in_memory_db
+    return self.creation.is_in_memory_db(self.settings_dict['NAME'])
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\db\backends\sqlite3\creation.py", line 12, in is_in_memory_db
+    return database_name == ':memory:' or 'mode=memory' in database_name
+TypeError: argument of type 'WindowsPath' is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 650, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\ProgramData\Anaconda3\lib\socketserver.py", line 720, in __init__
+    self.handle()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 169, in handle
+    self.handle_one_request()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 194, in handle_one_request
+    handler.run(self.server.get_app())
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 145, in run
+    self.handle_error()
+  File "C:\ProgramData\Anaconda3\lib\site-packages\django\core\servers\basehttp.py", line 116, in handle_error
+    super().handle_error()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 381, in handle_error
+    self.finish_response()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 184, in finish_response
+    self.write(data)
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 287, in write
+    self.send_headers()
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 344, in send_headers
+    if not self.origin_server or self.client_is_modern():
+  File "C:\ProgramData\Anaconda3\lib\wsgiref\handlers.py", line 357, in client_is_modern
+    return self.environ['SERVER_PROTOCOL'].upper() != 'HTTP/0.9'
+TypeError: 'NoneType' object is not subscriptable
+----------------------------------------

@@ -1,0 +1,42 @@
+
+  <!-- Trigger the modal with a button 
+  <button type="button" class="btn btn-primary" id="myBtn">Open Modal</button>
+-->
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Image Preview</h4>
+          <button type="button" class="close" data-dismiss="modal">x</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          <center>
+            <img src="" id="modal-img" width="300">
+          </center>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+$(document).ready(function(){
+  $(".thumb-img").click(function(){
+    $("#myModal").modal();
+    var img = $(this).attr("name");
+    $("#modal-img").attr('src',$("#"+img).attr("src"));
+  });
+});
+</script>

@@ -1,0 +1,127 @@
+html, body{
+    background-image: white;
+    margin: 0;
+    height: 100%;
+}
+
+#navbar-custom{
+    padding: 0px;
+}
+#navbar-custom .navbar-nav .nav-link{
+    color: white;
+    margin: 1px;
+    padding: 15px;
+    transition: background-color 0.1s,color 0.4s;
+}
+
+#navbar-custom .navbar-nav .nav-link:hover{
+    background-color: white;
+    margin: 0px;
+    border:solid  1px;
+    border-color: white;
+    color: black;
+}
+#n-brand{
+    padding:10px;
+    color: white;
+    text-shadow: 2px 2px 4px red;
+}
+.account-img {
+    height: 125px;
+    width: 125px;
+    margin-right: 20px;
+    margin-bottom: 16px;
+}  
+.content-section {
+    background: #dddddd;
+    padding: 10px 20px;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+.account-heading {
+    font-size: 2.5rem;
+}
+
+
+.or-container {
+    align-items: center;
+    color: #ccc;
+    display: flex;
+    margin: 25px 0
+}
+
+.line-separator {
+    background-color: #ccc;
+    flex-grow: 5;
+    height: 1px
+}
+
+.or-label {
+    flex-grow: 1;
+    margin: 0 15px;
+    text-align: center
+}
+
+.my-btn{
+    background-color: transparent;
+    color: #0066cc;
+    border-color: #0066cc;
+    border-radius: 5px;
+    transition: background-color 0.3s,color 0.3s;
+}
+.my-btn:hover{
+    background-color: #0066cc;
+    color: white;
+    border-radius: 5px;
+}
+.my-form{
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px gray;
+    border: none;
+    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 30px;
+    margin-top: 10px;
+}
+.profeditform{
+    background-color: white;
+    padding: 10px;
+    border: solid white 1px;
+    border-radius: 5px;
+}
+.p-row{
+    margin: 10px 10px;
+}
+.card{
+    background-color: white;
+    transition: background-color 1s;
+}
+.card:hover{
+    background-color: whitesmoke;
+} 
+#upload-form{
+    margin-left: 20px;
+    margin-top:25px;
+    border-radius:5px;
+    padding:5px 5px;
+    box-shadow: 1px 1px 5px gray;
+    background-color: white;
+    transition: background-color 1s;
+}
+#upload-form:hover{
+    background-color: rgba(0, 0, 0, 0.089);
+}
+#img-preview{
+    margin:0px;
+    padding:5px;
+
+}
+.thumb-img{
+    margin:3px;
+}
+.PageCustomHeading{
+    font-size: 200%;
+    font-weight: lighter;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

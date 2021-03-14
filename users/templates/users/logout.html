@@ -1,0 +1,11 @@
+<!-- You can refer to a base tempate in any other app of your project -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Logged_OUT !!!</h2>
+    <div class="border-top pt-3">
+       <small class="display-4 text-danger"> 
+       <a class="ml-2" href="{% url 'login' %}" style="background-color:white;padding:5px">Log-In again.</a>
+       </small>
+    </div>
+{% endblock content %}
