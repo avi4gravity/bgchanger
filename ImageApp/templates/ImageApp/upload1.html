@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="row upbody">
+        <div class="col-sm-4">
+            <form action="upload1" method="POST" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label><strong>Upload Files</strong></label>
+                    <input type="file" name="fg" class="file" required>
+                    <input type="file" name="bg" class="file" required>
+                    
+        
+                    <button type="submit" id="uploadsubmit" class="btn btn-block btn-dark">Upload Image</button>
+                </div>
+            </form>
+        </div>
+       
+    </div>
+<hr>
+
+{% endblock content %}

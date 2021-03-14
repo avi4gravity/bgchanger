@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse,JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Images,Backgrounds
+from django.http import JsonResponse
+from django.http import HttpResponse
+from .models import Images,Backgrounds,Images_DB
 from django.conf import settings
 import os 
 import pixellib
@@ -13,6 +15,7 @@ import PIL
 from PIL import Image
 import numpy as np 
 import cv2
+import hashlib
 import json
 from django.http import HttpResponse
 import matplotlib.pyplot as plt
@@ -25,9 +28,54 @@ import random
 
 import uuid
 
-
+import sqlite3
+conn = sqlite3.connect('test.db')
+try:
+    conn.execute('''CREATE TABLE IMG_DB
+         (ID TEXT PRIMARY KEY   NOT NULL,
+         MASK            TEXT     NOT NULL);''')
+    print('Table Created')
+except Exception as e:
+    print('Table Exists',e)
+    pass
+def check_mask_exists(fg):
+    print(fg)
+    conn = sqlite3.connect('test.db')
+    file_hash=hashlib.md5(open(fg,'rb').read()).hexdigest()
+    print(file_hash)
+    cursor = conn.execute("SELECT MASK from IMG_DB where ID='"+file_hash+"'")
+    x=[i[0] for i in cursor]
+    conn.close()
+    if not x:
+        print('Mask does not exists')
+        return None
+    else:
+        file_mask=os.path.join(path,'masks',x[0])
+        
+        if os.path.isfile(file_mask):
+            return file_mask
+        else:
+            print('mask file not found')
+            return None
+    
 
 # Create your views here.
+def make_mask2(img_name):
+    try:
+        file_name=os.path.basename(img_name)
+        img_path=os.path.join(path,'uploads')
+        mask_path=os.path.join(path,'masks')
+        a=segment_image.segmentAsPascalvoc(os.path.join(img_path,file_name), output_image_name = os.path.join(mask_path,file_name))
+        img=cv2.imread(os.path.join(img_path,file_name))
+        mask=cv2.imread(os.path.join(mask_path,file_name),0)
+        (thresh, mask) = cv2.threshold(mask, 130, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        kernel = np.ones((3,3), np.uint8)
+        mask = cv2.erode(mask,kernel,iterations = 3)
+        cv2.imwrite(os.path.join(mask_path,file_name),mask)
+        return {'msg':'Successful','file':file_name}
+    except Exception as e:
+        print(e)
+        return {'msg':e,'file':None}
 def make_mask(img_name):
     try:
         file_name=os.path.basename(img_name)
@@ -65,6 +113,87 @@ def make_shadow(fg,bg,mask):
         print(e)
         return bg
 
+def change_bg_2(fg,bg):
+    
+    mask_fg=''
+    try:
+        msg_1=check_mask_exists(fg)
+        msg={}
+        if msg_1:
+            mask_fg=msg_1
+            print(mask_fg)
+            msg['msg']='Successful'
+        else:
+            msg=make_mask2(fg)
+          
+            file_hash=hashlib.md5(open(fg,'rb').read()).hexdigest()
+            mask_fg=msg['file']
+            try:
+                conn = sqlite3.connect('test.db')
+                conn.execute("INSERT INTO IMG_DB (ID,MASK) VALUES ('"+file_hash+"','"+mask_fg+"')");
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                print(e)
+                msg['msg']=e
+            
+            
+        # bg=os.path.basename(bg)
+        print(msg)
+        if msg['msg']=='Successful':
+            img_path=os.path.join(path,'uploads')
+            mask_path=os.path.join(path,'masks')
+            # bg_path=os.path.join(path_,'background_pics')
+            output_path=os.path.join(path,'output')
+            
+            print(img_path,mask_fg,bg,output_path)
+            mask=cv2.imread(os.path.join(mask_path,mask_fg),0)
+            (thresh, mask) = cv2.threshold(mask, 130, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            fg=cv2.imread(os.path.join(img_path,fg))
+            bg=cv2.imread(bg)
+            bg=cv2.resize(bg,(fg.shape[1],fg.shape[0]))
+            bg=make_shadow(fg,bg,mask)
+            res_fg=cv2.bitwise_and(fg,fg,mask = mask)
+            res_bg = cv2.bitwise_and(bg,bg,mask = cv2.bitwise_not(mask))
+            new_image=res_fg+res_bg
+            unique_filename = str(uuid.uuid4())+'.jpg'
+            cv2.imwrite(os.path.join(output_path,unique_filename),new_image)
+            # domain = request.get_host()
+            data={'MSG':'Success','image_url':'media/output/'+unique_filename}
+            
+            return data
+        else:
+            data={'MSG':'Error','image_url':fg}
+            print('Some Error Occurs')
+           
+            return data
+    except Exception as e:
+        
+        data={'MSG':e,'image_url':fg}
+       
+        return data
+def two_bg_change(request):
+    mask_fg=''
+    data={}
+    if request.method == 'POST':
+        if len(request.FILES) !=0:
+            
+            fg = request.FILES.get('fg')
+            bg = request.FILES.get('bg')
+            fg_image = Images_DB.objects.create(image = fg)
+            bg_image = Images_DB.objects.create(image = bg)
+            # print(os.path.basename(str(fg_image.image)))
+            fg=os.path.join(path,'uploads',os.path.basename(str(fg_image.image)))
+            bg=os.path.join(path,'uploads',os.path.basename(str(bg_image.image)))
+            print(fg)
+            print(bg)
+            data=change_bg_2(fg,bg)
+            
+        return JsonResponse(data)
+        # bg=os.path.basename(bg)
+    else: 
+        print('Hhahha')
+    return render(request,'ImageApp/upload1.html')
 def change_bg(request,fg,bg):
     try:
         output=fg=os.path.basename(fg)
