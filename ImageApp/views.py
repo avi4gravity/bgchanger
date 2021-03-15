@@ -25,10 +25,14 @@ segment_image = semantic_segmentation()
 path=(settings.MEDIA_ROOT)
 segment_image.load_pascalvoc_model(os.path.join(path,"deeplabv3_xception_tf_dim_ordering_tf_kernels_improved.h5"))
 import random
-
+import base64
 import uuid
 
 import sqlite3
+def image2base64(img):
+    with open(img, "rb") as image_file:
+        image_data = base64.b64encode(image_file.read()).decode('utf-8')
+    return image_data
 conn = sqlite3.connect('test.db')
 try:
     conn.execute('''CREATE TABLE IMG_DB
@@ -159,17 +163,23 @@ def change_bg_2(fg,bg):
             unique_filename = str(uuid.uuid4())+'.jpg'
             cv2.imwrite(os.path.join(output_path,unique_filename),new_image)
             # domain = request.get_host()
-            data={'MSG':'Success','image_url':'media/output/'+unique_filename}
+            image_data=image2base64(os.path.join(output_path,unique_filename))
+            data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+            
             
             return data
         else:
-            data={'MSG':'Error','image_url':fg}
+            image_data=image2base64(os.path.join(path,'error-404-message.png'))
+            data={'MSG':'Error','image_url':fg,'img_data':image_data}
+            
             print('Some Error Occurs')
            
             return data
     except Exception as e:
         
-        data={'MSG':e,'image_url':fg}
+        image_data=image2base64(os.path.join(path,'error-404-message.png'))
+        data={'MSG':e,'image_url':fg,'img_data':image_data}
+            
        
         return data
 def two_bg_change(request):
