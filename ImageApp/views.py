@@ -169,7 +169,7 @@ def change_bg_2(fg,bg):
             
             return data
         else:
-            image_data=image2base64(os.path.join(path,'error-404-message.png'))
+            image_data=image2base64(os.path.join(path,'150.png'))
             data={'MSG':'Error','image_url':fg,'img_data':image_data}
             
             print('Some Error Occurs')
@@ -177,7 +177,7 @@ def change_bg_2(fg,bg):
             return data
     except Exception as e:
         
-        image_data=image2base64(os.path.join(path,'error-404-message.png'))
+        image_data=image2base64(os.path.join(path,'150.png'))
         data={'MSG':e,'image_url':fg,'img_data':image_data}
             
        
