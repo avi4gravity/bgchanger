@@ -7,9 +7,181 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.http import HttpResponse
 from .models import Images,Backgrounds,Images_DB
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+
+import os
+import cv2
+import numpy as np
+from easydict import EasyDict as edict
+from yaml import load
+
+import matplotlib
+import matplotlib.pyplot as plt
+import pylab
+
+
+import sys
+sys.path.insert(0, 'PortraitNet/model/')
+sys.path.insert(0, 'PortraitNet/data/')
+from data_aug import Normalize_Img, Anti_Normalize_Img
+def padding_img(img_ori, size=224, color=128):
+    height = img_ori.shape[0]
+    width = img_ori.shape[1]
+    img = np.zeros((max(height, width), max(height, width), 3)) + color
+    
+    if (height > width):
+        padding = int((height-width)//2)
+        img[:, padding:padding+width, :] = img_ori
+    else:
+        padding = int((width-height)//2)
+        img[padding:padding+height, :, :] = img_ori
+        
+    img = np.uint8(img)
+    img = cv2.resize(img, (size, size), interpolation=cv2.INTER_CUBIC)
+    return np.array(img, dtype=np.float32)
+
+def resize_padding(image, dstshape, padValue=0):
+    height, width, _ = image.shape
+    ratio = float(width)/height # ratio = (width:height)
+    dst_width = int(min(dstshape[1]*ratio, dstshape[0]))
+    dst_height = int(min(dstshape[0]//ratio, dstshape[1]))
+    origin = [int((dstshape[1] - dst_height)//2), int((dstshape[0] - dst_width)//2)]
+    if len(image.shape)==3:
+        image_resize = cv2.resize(image, (dst_width, dst_height))
+        newimage = np.zeros(shape = (dstshape[1], dstshape[0], image.shape[2]), dtype = np.uint8) + padValue
+        newimage[origin[0]:origin[0]+dst_height, origin[1]:origin[1]+dst_width, :] = image_resize
+        bbx = [origin[1], origin[0], origin[1]+dst_width, origin[0]+dst_height] # x1,y1,x2,y2
+    else:
+        image_resize = cv2.resize(image, (dst_width, dst_height),  interpolation = cv2.INTER_NEAREST)
+        newimage = np.zeros(shape = (dstshape[1], dstshape[0]), dtype = np.uint8)
+        newimage[origin[0]:origin[0]+height, origin[1]:origin[1]+width] = image_resize
+        bbx = [origin[1], origin[0], origin[1]+dst_width, origin[0]+dst_height] # x1,y1,x2,y2
+    return newimage, bbx
+
+def generate_input(exp_args, inputs, prior=None):
+    inputs_norm = Normalize_Img(inputs, scale=exp_args.img_scale, mean=exp_args.img_mean, val=exp_args.img_val)
+    
+    if exp_args.video == True:
+        if prior is None:
+            prior = np.zeros((exp_args.input_height, exp_args.input_width, 1))
+            inputs_norm = np.c_[inputs_norm, prior]
+        else:
+            prior = prior.reshape(exp_args.input_height, exp_args.input_width, 1)
+            inputs_norm = np.c_[inputs_norm, prior]
+       
+    inputs = np.transpose(inputs_norm, (2, 0, 1))
+    return np.array(inputs, dtype=np.float32)
+
+def pred_single(model, exp_args, img_ori, prior=None):
+    model.eval()
+    softmax = nn.Softmax(dim=1)
+    
+    in_shape = img_ori.shape
+    img, bbx = resize_padding(img_ori, [exp_args.input_height, exp_args.input_width], padValue=exp_args.padding_color)
+    
+    in_ = generate_input(exp_args, img, prior)
+    in_ = in_[np.newaxis, :, :, :]
+    
+    if exp_args.addEdge == True:
+        output_mask, output_edge = model(Variable(torch.from_numpy(in_)))
+    else:
+        output_mask = model(Variable(torch.from_numpy(in_)))
+    prob = softmax(output_mask)
+    pred = prob.data.cpu().numpy()
+    
+    predimg = pred[0].transpose((1,2,0))[:,:,1]
+    out = predimg[bbx[1]:bbx[3], bbx[0]:bbx[2]]
+    out = cv2.resize(out, (in_shape[1], in_shape[0]))
+    return out, predimg
+# config_path = 'PortraitNet/config/model_mobilenetv2_with_two_auxiliary_losses.yaml'
+
+# load model-3: trained with prior channel
+config_path = 'PortraitNet/config/model_mobilenetv2_with_prior_channel.yaml'
+
+with open(config_path,'rb') as f:
+    cont = f.read()
+cf = load(cont)
+
+print ('finish load config file ...')
+exp_args = edict()    
+exp_args.istrain = False
+exp_args.task = cf['task']
+exp_args.datasetlist = cf['datasetlist'] # ['EG1800', ATR', 'MscocoBackground', 'supervisely_face_easy']
+
+exp_args.model_root = cf['model_root'] 
+exp_args.data_root = cf['data_root']
+exp_args.file_root = cf['file_root']
+
+# the height of input images, default=224
+exp_args.input_height = cf['input_height']
+# the width of input images, default=224
+exp_args.input_width = cf['input_width']
+
+# if exp_args.video=True, add prior channel for input images, default=False
+exp_args.video = cf['video']
+# the probability to set empty prior channel, default=0.5
+exp_args.prior_prob = cf['prior_prob']
+
+# whether to add boundary auxiliary loss, default=False
+exp_args.addEdge = cf['addEdge']
+# whether to add consistency constraint loss, default=False
+exp_args.stability = cf['stability']
+
+# input normalization parameters
+exp_args.padding_color = cf['padding_color']
+exp_args.img_scale = cf['img_scale']
+# BGR order, image mean, default=[103.94, 116.78, 123.68]
+exp_args.img_mean = cf['img_mean']
+# BGR order, image val, default=[0.017, 0.017, 0.017]
+exp_args.img_val = cf['img_val'] 
+
+# if exp_args.useUpsample==True, use nn.Upsample in decoder, else use nn.ConvTranspose2d
+exp_args.useUpsample = cf['useUpsample'] 
+# if exp_args.useDeconvGroup==True, set groups=input_channel in nn.ConvTranspose2d
+exp_args.useDeconvGroup = cf['useDeconvGroup'] 
+import model_mobilenetv2_seg_small as modellib
+netmodel_video = modellib.MobileNetV2(n_class=2, 
+                                      useUpsample=exp_args.useUpsample, 
+                                      useDeconvGroup=exp_args.useDeconvGroup, 
+                                      addEdge=exp_args.addEdge, 
+                                      channelRatio=1.0, 
+                                      minChannel=16, 
+                                      weightInit=True,
+                                      video=exp_args.video)
+
+
+bestModelFile = 'Model/PortraitSegments.pth'
+import sys
+sys.path.append("FBA_Matting")
+
+from demo import np_to_torch, pred, scale_input
+from dataloader import read_image, read_trimap
+from networks.models import build_model
+
+netmodel_video.stage0[0].padding=(1,1)
+netmodel_video.transit1.block[0][0].padding=(1,1)
+netmodel_video.transit2.block[0][0].padding=(1,1)
+netmodel_video.transit3.block[0][0].padding=(1,1)
+netmodel_video.transit4.block[0][0].padding=(1,1)
+netmodel_video.transit5.block[0][0].padding=(1,1)
+
+print('Model Made')
+checkpoint_video = torch.load(bestModelFile)
+netmodel_video.load_state_dict(checkpoint_video)
+class Args:
+    encoder = 'resnet50_GN_WS'
+    decoder = 'fba_decoder'
+    weights = 'Model/FBA.pth'
+
+args=Args()
+
+model = build_model(args)
+
+
 from django.conf import settings
 import os 
-import pixellib
 # from pixellib.semantic import semantic_segmentation
 import PIL
 from PIL import Image
@@ -183,6 +355,38 @@ def change_bg_2(fg,bg):
             
        
         return data
+def change_bg_a1(image_fg,image_bg):
+    try:
+        output_path=os.path.join(path,'output')
+        img_path=os.path.join(path,'uploads')
+        img_ori = cv2.imread(os.path.join(img_path,fg))
+        green=cv2.imread(image_bg)
+        if not green:
+            green = np.zeros(image_ori.shape)
+            green[:, :, :] = np.array([1, 1, 1])
+        green=cv2.resize(green,(img_ori.shape[1],img_ori.shape[0]))
+        prior = None
+        height, width, _ = img_ori.shape
+        alphargb, pred1 = pred_single(netmodel_video, exp_args, img_ori, prior)
+        mask=alphargb>0.7
+        trimap = np.zeros((mask.shape[0], mask.shape[1], 2))
+        trimap[:, :, 1] = mask > 0
+        trimap[:, :, 0] = mask == 0
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(51,51))
+        trimap[:, :, 0] = cv2.erode(trimap[:, :, 0], kernel)
+        trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
+        fg, bg, alpha = pred((img_ori/255.0)[:, :, ::-1], trimap, model)
+        blend = fg*alpha[:,:,None] + green*(1 - alpha[:,:,None])/255.0
+        unique_filename = str(uuid.uuid4())+'.jpg'
+        cv2.imwrite(os.path.join(output_path,unique_filename),blend)
+        del blend,fg,bg,alpha,trimap,mask,alphargb,green,img_ori,pred1,
+        data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+        return data
+    except Exception as e:
+        image_data=image2base64(os.path.join(path,'150.png'))
+        data={'MSG':e,'image_url':fg,'img_data':image_data}
+        return data
+    
 def two_bg_change(request):
     mask_fg=''
     data={}
@@ -198,7 +402,7 @@ def two_bg_change(request):
             bg=os.path.join(path,'uploads',os.path.basename(str(bg_image.image)))
             print(fg)
             print(bg)
-            data={'a':change_bg_2(fg,bg)}
+            data={'a':change_bg_a1(fg,bg)}
             
         return JsonResponse(data)
         # bg=os.path.basename(bg)
@@ -206,7 +410,8 @@ def two_bg_change(request):
         print('Hhahha')
     return render(request,'ImageApp/upload1.html')
 
-    
+
+
 def home(request):
     return render(request,'ImageApp/home.html',{})
 
