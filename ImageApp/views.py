@@ -21,7 +21,7 @@ from django.http import HttpResponse
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from django.http import JsonResponse
-segment_image = semantic_segmentation()
+# segment_image = semantic_segmentation()
 path=(settings.MEDIA_ROOT)
 # segment_image.load_pascalvoc_model(os.path.join(path,"deeplabv3_xception_tf_dim_ordering_tf_kernels_improved.h5"))
 import random
