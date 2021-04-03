@@ -210,7 +210,8 @@ def two_bg_change(request):
 def home(request):
     return render(request,'ImageApp/home.html',{})
 
-
+def change_bg_view(request):
+    return 'abc'
 '''
 @login_required
 def UploadView(request):
