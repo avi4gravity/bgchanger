@@ -10,7 +10,7 @@ from .models import Images,Backgrounds,Images_DB
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-
+import tensorflow as tf
 import os
 import cv2
 import numpy as np
@@ -52,8 +52,9 @@ def run_tflite_model(tflite_file, test_image):
   return mask
 def mask_tf(image):
   image1=image
+  print(image1.shape)
   image=cv2.resize(image,(512,512))
-  mask=run_tflite_model(tflite_file='slim_reshape_v2.tflite',test_image=image)
+  mask=run_tflite_model(tflite_file=pwd+'/slim_reshape_v2.tflite',test_image=image)
   mask=mask.astype(np.uint8)
   mask=cv2.resize(mask,(image1.shape[1],image1.shape[0]))
   return mask
@@ -72,13 +73,16 @@ def chang_bg_a3(image_fg,image_bg):
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(51,51))
         trimap[:, :, 0] = cv2.erode(trimap[:, :, 0], kernel)
         trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
-        fg, bg, alpha = pred((image1/255.0)[:, :, ::-1], trimap, model)
+        fg, bg, alpha = pred((image/255.0)[:, :, ::-1], trimap, model)
         blend = fg*alpha[:,:,None]*255.0 + green*(1 - alpha[:,:,None])
         unique_filename = str(uuid.uuid4())+'.jpg'
         blend=blend.astype(np.uint8)
         cv2.imwrite(os.path.join(output_path,unique_filename),blend)
         image_data=image2base64(os.path.join(output_path,unique_filename))
-        data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+        os.remove(os.path.join(output_path,unique_filename))
+        os.remove(os.path.join(img_path,image_fg))
+        os.remove(image_bg)
+        data={'MSG':'Success','img_data':image_data}
         return data
     except Exception as e:
         image_data=image2base64(os.path.join(path,'150.png'))
@@ -400,7 +404,9 @@ def change_bg_2(fg,bg):
             cv2.imwrite(os.path.join(output_path,unique_filename),new_image)
             # domain = request.get_host()
             image_data=image2base64(os.path.join(output_path,unique_filename))
-            data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+            os.remove(os.path.join(output_path,unique_filename))
+            
+            data={'MSG':'Success','img_data':image_data}
             
             
             return data
@@ -445,7 +451,11 @@ def change_bg_a1(image_fg,image_bg):
         cv2.imwrite(os.path.join(output_path,unique_filename),blend)
         del blend,fg,bg,alpha,trimap,mask,alphargb,green,img_ori,pred1,
         image_data=image2base64(os.path.join(output_path,unique_filename))
-        data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+        os.remove(os.path.join(output_path,unique_filename))
+        os.remove(image_bg)
+        os.remove(os.path.join(img_path,image_fg))
+
+        data={'MSG':'Success','img_data':image_data}
         return data
     except Exception as e:
         image_data=image2base64(os.path.join(path,'150.png'))
@@ -457,7 +467,8 @@ def two_bg_change(request):
     data={}
     if request.method == 'POST':
         if len(request.FILES) !=0:
-            
+            model_s=request.POST.get('model')
+            model_s=int(model_s)
             fg = request.FILES.get('fg')
             bg = request.FILES.get('bg')
             fg_image = Images_DB.objects.create(image = fg)
@@ -467,9 +478,11 @@ def two_bg_change(request):
             bg=os.path.join(path,'uploads',os.path.basename(str(bg_image.image)))
             print(fg)
             print(bg)
-            data={'a':change_bg_a1(fg,bg)}
-    
-
+            if model_s==1:
+                data={'a':change_bg_a1(fg,bg)}
+            elif model_s==2:
+                data={'a':chang_bg_a3(fg,bg)}
+        
             
         return JsonResponse(data)
         # bg=os.path.basename(bg)
