@@ -21,10 +21,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pylab
 
-
+import os
+pwd=os.path.dirname(__file__)
 import sys
-sys.path.insert(0, 'PortraitNet/model/')
-sys.path.insert(0, 'PortraitNet/data/')
+sys.path.insert(0,pwd+'/PortraitNet/model/')
+sys.path.insert(0,pwd+'/PortraitNet/data/')
+print(sys.path)
 from data_aug import Normalize_Img, Anti_Normalize_Img
 def padding_img(img_ori, size=224, color=128):
     height = img_ori.shape[0]
@@ -98,7 +100,8 @@ def pred_single(model, exp_args, img_ori, prior=None):
 # config_path = 'PortraitNet/config/model_mobilenetv2_with_two_auxiliary_losses.yaml'
 
 # load model-3: trained with prior channel
-config_path = 'PortraitNet/config/model_mobilenetv2_with_prior_channel.yaml'
+config_path = pwd+'/PortraitNet/config/model_mobilenetv2_with_prior_channel.yaml'
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 
 with open(config_path,'rb') as f:
     cont = f.read()
@@ -152,9 +155,10 @@ netmodel_video = modellib.MobileNetV2(n_class=2,
                                       video=exp_args.video)
 
 
-bestModelFile = 'Model/PortraitSegments.pth'
+bestModelFile = pwd+'/Model/PortraitSegments.pth'
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 import sys
-sys.path.append("FBA_Matting")
+sys.path.append(pwd+"/FBA_Matting")
 
 from demo import np_to_torch, pred, scale_input
 from dataloader import read_image, read_trimap
@@ -173,7 +177,7 @@ netmodel_video.load_state_dict(checkpoint_video)
 class Args:
     encoder = 'resnet50_GN_WS'
     decoder = 'fba_decoder'
-    weights = 'Model/FBA.pth'
+    weights = pwd+'/Model/FBA.pth'
 
 args=Args()
 
@@ -359,16 +363,16 @@ def change_bg_a1(image_fg,image_bg):
     try:
         output_path=os.path.join(path,'output')
         img_path=os.path.join(path,'uploads')
-        img_ori = cv2.imread(os.path.join(img_path,fg))
+        img_ori = cv2.imread(os.path.join(img_path,image_fg))
         green=cv2.imread(image_bg)
-        if not green:
-            green = np.zeros(image_ori.shape)
-            green[:, :, :] = np.array([1, 1, 1])
+        print(img_ori.shape)
         green=cv2.resize(green,(img_ori.shape[1],img_ori.shape[0]))
         prior = None
         height, width, _ = img_ori.shape
         alphargb, pred1 = pred_single(netmodel_video, exp_args, img_ori, prior)
         mask=alphargb>0.7
+        print(mask.shape)
+        print(green.shape)
         trimap = np.zeros((mask.shape[0], mask.shape[1], 2))
         trimap[:, :, 1] = mask > 0
         trimap[:, :, 0] = mask == 0
@@ -376,15 +380,17 @@ def change_bg_a1(image_fg,image_bg):
         trimap[:, :, 0] = cv2.erode(trimap[:, :, 0], kernel)
         trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
         fg, bg, alpha = pred((img_ori/255.0)[:, :, ::-1], trimap, model)
-        blend = fg*alpha[:,:,None] + green*(1 - alpha[:,:,None])/255.0
+        blend =cv2.cvtColor((fg*alpha[:,:,None])*255.0,cv2.COLOR_BGR2RGB) + green*(1 - alpha[:,:,None])
         unique_filename = str(uuid.uuid4())+'.jpg'
+        blend=blend.astype(np.uint8)
         cv2.imwrite(os.path.join(output_path,unique_filename),blend)
         del blend,fg,bg,alpha,trimap,mask,alphargb,green,img_ori,pred1,
+        image_data=image2base64(os.path.join(output_path,unique_filename))
         data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
         return data
     except Exception as e:
         image_data=image2base64(os.path.join(path,'150.png'))
-        data={'MSG':e,'image_url':fg,'img_data':image_data}
+        data={'MSG':e,'image_url':'abc','img_data':image_data}
         return data
     
 def two_bg_change(request):
@@ -403,6 +409,8 @@ def two_bg_change(request):
             print(fg)
             print(bg)
             data={'a':change_bg_a1(fg,bg)}
+    
+
             
         return JsonResponse(data)
         # bg=os.path.basename(bg)
