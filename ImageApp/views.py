@@ -27,6 +27,65 @@ import sys
 sys.path.insert(0,pwd+'/PortraitNet/model/')
 sys.path.insert(0,pwd+'/PortraitNet/data/')
 print(sys.path)
+def run_tflite_model(tflite_file, test_image):
+
+  # Initialize the interpreter
+  interpreter = tf.lite.Interpreter(model_path=str(tflite_file))
+  interpreter.allocate_tensors()
+
+  # Get input and output details
+  input_details = interpreter.get_input_details()[0]
+  output_details = interpreter.get_output_details()[0]
+
+  # Preprocess the input image
+  test_image = test_image/255.0
+  test_image = np.expand_dims(test_image, axis=0).astype(input_details["dtype"])
+
+  # Run the interpreter and get the output
+  interpreter.set_tensor(input_details["index"], test_image)
+  interpreter.invoke()
+  output = interpreter.get_tensor(output_details["index"])[0]
+
+  # Compute mask from segmentaion output
+  mask = np.reshape(output, (512,512))>0.5
+
+  return mask
+def mask_tf(image):
+  image1=image
+  image=cv2.resize(image,(512,512))
+  mask=run_tflite_model(tflite_file='slim_reshape_v2.tflite',test_image=image)
+  mask=mask.astype(np.uint8)
+  mask=cv2.resize(mask,(image1.shape[1],image1.shape[0]))
+  return mask
+def chang_bg_a3(image_fg,image_bg):
+    try:
+        output_path=os.path.join(path,'output')
+        img_path=os.path.join(path,'uploads')
+        image= cv2.imread(os.path.join(img_path,image_fg))
+        green=cv2.imread(image_bg)
+        green=cv2.resize(green,(image.shape[1],image.shape[0]))
+        image=cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        mask=mask_tf(image)
+        trimap = np.zeros((mask.shape[0], mask.shape[1], 2))
+        trimap[:, :, 1] = mask > 0
+        trimap[:, :, 0] = mask == 0
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(51,51))
+        trimap[:, :, 0] = cv2.erode(trimap[:, :, 0], kernel)
+        trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
+        fg, bg, alpha = pred((image1/255.0)[:, :, ::-1], trimap, model)
+        blend = fg*alpha[:,:,None]*255.0 + green*(1 - alpha[:,:,None])
+        unique_filename = str(uuid.uuid4())+'.jpg'
+        blend=blend.astype(np.uint8)
+        cv2.imwrite(os.path.join(output_path,unique_filename),blend)
+        image_data=image2base64(os.path.join(output_path,unique_filename))
+        data={'MSG':'Success','image_url':'media/output/'+unique_filename,'img_data':image_data}
+        return data
+    except Exception as e:
+        image_data=image2base64(os.path.join(path,'150.png'))
+        data={'MSG':e,'image_url':'abc','img_data':image_data}
+        return data
+
+    
 from data_aug import Normalize_Img, Anti_Normalize_Img
 def padding_img(img_ori, size=224, color=128):
     height = img_ori.shape[0]
