@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from .models import Images,Backgrounds,Images_DB
 import torch
+import imutils
 import torch.nn as nn
 from torch.autograd import Variable
 import tensorflow as tf
@@ -63,9 +64,24 @@ def chang_bg_a3(image_fg,image_bg):
         output_path=os.path.join(path,'output')
         img_path=os.path.join(path,'uploads')
         image= cv2.imread(os.path.join(img_path,image_fg))
-        green=cv2.imread(image_bg)
-        green=cv2.resize(green,(image.shape[1],image.shape[0]))
+        if image.shape[0]>1080 or image.shape[1]>1080:
+            image=imutils.resize(image,height=1089)
+        green=None
+        signal=True
+        if os.path.isfile(image_bg):
+            green=cv2.imread(image_bg)
+            signal=False
+            msg1='I am file'
+            green=cv2.resize(green,(image.shape[1],image.shape[0]))
+        if signal:
+            green = np.zeros(image.shape)
+            green[:, :, :] = np.array([1, 1, 1])
+            msg1='I am not file'
+            green=cv2.resize(green,(image.shape[1],image.shape[0]))
+
+    
         image=cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        msg1=str(image.shape)
         mask=mask_tf(image)
         trimap = np.zeros((mask.shape[0], mask.shape[1], 2))
         trimap[:, :, 1] = mask > 0
@@ -75,18 +91,23 @@ def chang_bg_a3(image_fg,image_bg):
         trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
         fg, bg, alpha = pred((image/255.0)[:, :, ::-1], trimap, model)
         blend = fg*alpha[:,:,None]*255.0 + green*(1 - alpha[:,:,None])
-        unique_filename = str(uuid.uuid4())+'.jpg'
+        unique_filename = str(uuid.uuid4())+'.png'
         blend=blend.astype(np.uint8)
+        alpha=(alpha*255).astype(np.uint8)
+        if signal:
+            blend = np.dstack((blend, alpha))
         cv2.imwrite(os.path.join(output_path,unique_filename),blend)
         image_data=image2base64(os.path.join(output_path,unique_filename))
-        os.remove(os.path.join(output_path,unique_filename))
+        image_url=os.path.join('media/output',unique_filename)
         os.remove(os.path.join(img_path,image_fg))
-        os.remove(image_bg)
-        data={'MSG':'Success','img_data':image_data}
+        if not signal:
+            os.remove(image_bg)
+        data={'MSG':'Success','image_url':image_url}
         return data
     except Exception as e:
         image_data=image2base64(os.path.join(path,'150.png'))
-        data={'MSG':e,'image_url':'abc','img_data':image_data}
+        data={'MSG':str(e)+msg1,'image_url':'abc'}
+        print(data)
         return data
 
     
@@ -429,8 +450,18 @@ def change_bg_a1(image_fg,image_bg):
         output_path=os.path.join(path,'output')
         img_path=os.path.join(path,'uploads')
         img_ori = cv2.imread(os.path.join(img_path,image_fg))
-        green=cv2.imread(image_bg)
-        print(img_ori.shape)
+        
+        if img_ori.shape[0]>1080 or img_ori.shape[1]>1080:
+            img_ori=imutils.resize(img_ori,height=1080)
+        green=None
+        signal=True
+        if os.path.isfile(image_bg):
+            green=cv2.imread(image_bg)
+            signal=False
+        if signal:
+            green=np.zeros(img_ori.shape)
+            green[:,:,:]=np.array([1,1,1])
+
         green=cv2.resize(green,(img_ori.shape[1],img_ori.shape[0]))
         prior = None
         height, width, _ = img_ori.shape
@@ -446,20 +477,23 @@ def change_bg_a1(image_fg,image_bg):
         trimap[:, :, 1] = cv2.erode(trimap[:, :, 1], kernel)
         fg, bg, alpha = pred((img_ori/255.0)[:, :, ::-1], trimap, model)
         blend =cv2.cvtColor((fg*alpha[:,:,None])*255.0,cv2.COLOR_BGR2RGB) + green*(1 - alpha[:,:,None])
-        unique_filename = str(uuid.uuid4())+'.jpg'
+        unique_filename = str(uuid.uuid4())+'.png'
+        alpha=(alpha*255).astype(np.uint8)
         blend=blend.astype(np.uint8)
+        if signal:
+            blend=np.dstack((blend,alpha))
         cv2.imwrite(os.path.join(output_path,unique_filename),blend)
         del blend,fg,bg,alpha,trimap,mask,alphargb,green,img_ori,pred1,
-        image_data=image2base64(os.path.join(output_path,unique_filename))
-        os.remove(os.path.join(output_path,unique_filename))
-        os.remove(image_bg)
+        img_url='media/output/'+unique_filename
+        if not signal:
+            os.remove(image_bg)
         os.remove(os.path.join(img_path,image_fg))
 
-        data={'MSG':'Success','img_data':image_data}
+        data={'MSG':'Success','image_url':img_url}
         return data
     except Exception as e:
-        image_data=image2base64(os.path.join(path,'150.png'))
-        data={'MSG':e,'image_url':'abc','img_data':image_data}
+        data={'MSG':str(e),'image_url':'abc'}
+        print(data)
         return data
     
 def two_bg_change(request):
@@ -482,6 +516,7 @@ def two_bg_change(request):
                 data={'a':change_bg_a1(fg,bg)}
             elif model_s==2:
                 data={'a':chang_bg_a3(fg,bg)}
+        
         
             
         return JsonResponse(data)
